@@ -1,4 +1,4 @@
-package api
+package http_server
 
 import (
 	"net/http"
@@ -6,11 +6,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type HttpServer struct {
+	Engine *gin.Engine
+}
+
+func NewHttpServer() *HttpServer {
+	engine := gin.Default()
+	return &HttpServer{
+		Engine: engine,
+	}
+}
+
+func (h *HttpServer) GetRouterGroup(prefix string) *gin.RouterGroup {
+	return h.Engine.Group(prefix)
+}
+
+func (h *HttpServer) Run() {
+	h.Engine.Run(":8080")
+}
+
 type HandlerWithBody[T any] func(*gin.Context, T) (int, any, error)
 type HandlerNoBody func(*gin.Context) (int, any, error)
 
 // TODO: Better error handling, add err wrapper itd and return status code based on err definition
-// TODO: Move API to own lib and also errors to own lib
+// TODO: Move Server to own lib and also errors to own lib
 // TODO: Add logger
 
 func WrapWithBody[T any](handler HandlerWithBody[T]) gin.HandlerFunc {
