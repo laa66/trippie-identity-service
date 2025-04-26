@@ -1,7 +1,6 @@
 package http_server
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -32,8 +31,8 @@ func (h *HttpServer) Run() {
 	h.Engine.Run(":8080")
 }
 
-type HandlerWithBody[T any] func(context.Context, T) (int, any, error)
-type HandlerNoBody func(context.Context) (int, any, error)
+type HandlerWithBody[T any] func(HandlerContext, T) (int, any, error)
+type HandlerNoBody func(HandlerContext) (int, any, error)
 
 func WrapWithBody[T any](handler HandlerWithBody[T]) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -43,7 +42,9 @@ func WrapWithBody[T any](handler HandlerWithBody[T]) gin.HandlerFunc {
 			return
 		}
 
-		code, res, err := handler(c, body)
+		handlerContext := HandlerContext{Ctx: c}
+
+		code, res, err := handler(handlerContext, body)
 
 		if res == nil {
 			responseNoData(c, code, err)
@@ -56,7 +57,8 @@ func WrapWithBody[T any](handler HandlerWithBody[T]) gin.HandlerFunc {
 
 func WrapNoBody(handler HandlerNoBody) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		code, res, err := handler(c)
+		handlerContext := HandlerContext{Ctx: c}
+		code, res, err := handler(handlerContext)
 		if res == nil {
 			responseNoData(c, code, err)
 		} else {
