@@ -1,7 +1,10 @@
 package api
 
 import (
+	"context"
+
 	"github.com/gin-gonic/gin"
+	apperr "github.com/laa66/trippie-identity-service.git/error"
 	http_server "github.com/laa66/trippie-identity-service.git/server"
 )
 
@@ -14,8 +17,6 @@ func RegisterIdentityEndpoints(rg *gin.RouterGroup) {
 }
 
 // TODO: move to handler
-func LoginHandler(ctx *gin.Context) (int, any, error) {
-	return 200, Object{
-		Name: "mx",
-	}, nil
+func LoginHandler(ctx context.Context) (int, any, error) {
+	return 0, nil, apperr.New("djwakfkaf").WithHttpStatus(403)
 }

@@ -1,6 +1,9 @@
 package app
 
 import (
+	"log/slog"
+	"os"
+
 	"github.com/laa66/trippie-identity-service.git/api"
 	http_server "github.com/laa66/trippie-identity-service.git/server"
 )
@@ -18,8 +21,15 @@ func CreateApp() *App {
 	app := &App{}
 	app.httpServer = http_server.NewHttpServer()
 
+	InitLogger()
 	// Register JSON endpoints
 	api.RegisterIdentityEndpoints(app.httpServer.GetRouterGroup("identity"))
 
 	return app
+}
+
+// TODO: move to logger package
+func InitLogger() {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
 }

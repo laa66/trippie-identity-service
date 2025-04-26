@@ -1,9 +1,14 @@
 package http_server
 
 import (
+	"context"
+	"fmt"
+	"log/slog"
 	"net/http"
 
+	"github.com/cockroachdb/errors"
 	"github.com/gin-gonic/gin"
+	apperr "github.com/laa66/trippie-identity-service.git/error"
 )
 
 type HttpServer struct {
@@ -12,6 +17,7 @@ type HttpServer struct {
 
 func NewHttpServer() *HttpServer {
 	engine := gin.Default()
+	engine.Use(ErrorHandler())
 	return &HttpServer{
 		Engine: engine,
 	}
@@ -22,15 +28,12 @@ func (h *HttpServer) GetRouterGroup(prefix string) *gin.RouterGroup {
 }
 
 func (h *HttpServer) Run() {
+	// TODO: move to config
 	h.Engine.Run(":8080")
 }
 
-type HandlerWithBody[T any] func(*gin.Context, T) (int, any, error)
-type HandlerNoBody func(*gin.Context) (int, any, error)
-
-// TODO: Better error handling, add err wrapper itd and return status code based on err definition
-// TODO: Move Server to own lib and also errors to own lib
-// TODO: Add logger
+type HandlerWithBody[T any] func(context.Context, T) (int, any, error)
+type HandlerNoBody func(context.Context) (int, any, error)
 
 func WrapWithBody[T any](handler HandlerWithBody[T]) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -64,7 +67,7 @@ func WrapNoBody(handler HandlerNoBody) gin.HandlerFunc {
 
 func responseNoData(c *gin.Context, code int, err error) {
 	if err != nil {
-		c.JSON(code, err.Error())
+		c.Error(err)
 	} else {
 		c.Status(code)
 	}
@@ -72,8 +75,38 @@ func responseNoData(c *gin.Context, code int, err error) {
 
 func response(c *gin.Context, code int, data any, err error) {
 	if err != nil {
-		c.JSON(code, err.Error())
+		c.Error(err)
 	} else {
 		c.JSON(code, data)
+	}
+}
+
+// TODO: move to middleware in server
+func ErrorHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		defer func() {
+			if r := recover(); r != nil {
+				slog.Error("panic recovered", "error", r)
+				c.AbortWithStatusJSON(http.StatusInternalServerError, apperr.New("internal server error").WithHttpStatus(500))
+			}
+		}()
+
+		c.Next()
+
+		err := c.Errors.Last()
+		if err == nil {
+			return
+		}
+
+		var appErr *apperr.AppErr
+		if errors.As(err.Err, &appErr) {
+			fmt.Printf("%+v\n", appErr.WrappedError())
+			c.JSON(appErr.Code, appErr)
+			return
+		}
+
+		wrapped := apperr.Wrap(err.Err)
+		fmt.Printf("%+v\n", wrapped.WrappedError())
+		c.JSON(500, wrapped)
 	}
 }
