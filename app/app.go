@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	"github.com/laa66/trippie-identity-service.git/api"
 	http_server "github.com/laa66/trippie-identity-service.git/server"
 )
@@ -19,7 +20,9 @@ func (a *App) Run() {
 func CreateApp() *App {
 	// Build components
 	app := &App{}
-	app.httpServer = http_server.NewHttpServer()
+	engine := gin.Default()
+	engine.Use(http_server.ErrorHandler())
+	app.httpServer = http_server.NewHttpServer(engine)
 
 	InitLogger()
 	// Register JSON endpoints
