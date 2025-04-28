@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// TODO: Add TX support
+// TODO: Move to lib, add TX support, create persistence/postgre_persistence that initializes db connection and build other persistences
 type Repository[T any] interface {
 	GetByID(id uint) (*T, apperr.AppErr)
 	GetAll() ([]*T, apperr.AppErr)
