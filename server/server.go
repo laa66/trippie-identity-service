@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// TODO: move to lib
 type HttpServer struct {
 	Engine *gin.Engine
 }

@@ -5,11 +5,11 @@ import (
 	crerr "github.com/cockroachdb/errors"
 )
 
-// TODO: Add err definition
 type AppErr struct {
 	error
 	Code       int    `json:"code"`
 	Cause      string `json:"cause,omitempty"`
+	Title      string `json:"title,omitempty"`
 	Message    string `json:"message,omitempty"`
 	wrappedErr error  `json:"-"`
 }
@@ -52,6 +52,31 @@ func (a *AppErr) WithHttpStatus(httpStatus int) *AppErr {
 	return a
 }
 
+func (a *AppErr) WithTitle(title string) *AppErr {
+	a.Title = title
+	return a
+}
+
 func (a *AppErr) WrappedError() error {
 	return a.wrappedErr
+}
+
+type ErrorDef struct {
+	Status  int
+	Title   string
+	Code    int
+	Message string
+}
+
+func NewErrorDef(status int, title string, code int, message string) ErrorDef {
+	return ErrorDef{
+		Status:  status,
+		Title:   title,
+		Code:    code,
+		Message: message,
+	}
+}
+
+func (e ErrorDef) ToAppErr(err error) *AppErr {
+	return Wrap(err).WithTitle(e.Title).WithMessage(e.Message).WithHttpStatus(e.Status)
 }
