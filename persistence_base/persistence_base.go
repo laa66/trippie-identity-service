@@ -1,4 +1,4 @@
-package persistence_base
+package persistencebase
 
 import (
 	apperr "github.com/laa66/trippie-identity-service.git/error"
