@@ -15,6 +15,6 @@ func RegisterIdentityEndpoints(rg *gin.RouterGroup) {
 }
 
 // TODO: move to handler
-func LoginHandler(handlerContext http_server.HandlerContext) (int, any, error) {
+func LoginHandler(handlerContext http_server.HandlerContext) (responseCode int, data any, err error) {
 	return 0, nil, apperr.New("djwakfkaf").WithHttpStatus(403)
 }
