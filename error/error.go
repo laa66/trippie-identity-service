@@ -6,7 +6,6 @@ import (
 )
 
 type AppErr struct {
-	error
 	Code       int    `json:"code"`
 	Cause      string `json:"cause,omitempty"`
 	Title      string `json:"title,omitempty"`
