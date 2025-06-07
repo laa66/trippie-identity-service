@@ -56,7 +56,6 @@ func WrapNoBody(handler HandlerNoBody) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		handlerContext := &handlerContext{Ctx: c}
 		code, res, err := handler(handlerContext)
-		fmt.Printf("handler response: {code: %d, res: %s, err: %+v}\n", code, res, err)
 		if res == nil {
 			responseNoData(c, code, err)
 		} else {
@@ -67,10 +66,18 @@ func WrapNoBody(handler HandlerNoBody) gin.HandlerFunc {
 
 func responseNoData(c *gin.Context, code int, err error) {
 	if err != nil {
+		if apperr, ok := err.(*apperr.AppErr); ok {
+			if apperr == nil {
+				c.Status(code)
+				return
+			}
+			c.Error(apperr)
+			return
+		}
 		c.Error(err)
-	} else {
-		c.Status(code)
 	}
+	c.Status(code)
+
 }
 
 func response(c *gin.Context, code int, data any, err error) {
