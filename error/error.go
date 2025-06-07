@@ -2,6 +2,8 @@ package apperr
 
 import (
 	"context"
+	"fmt"
+
 	crerr "github.com/cockroachdb/errors"
 )
 
@@ -58,6 +60,13 @@ func (a *AppErr) WithTitle(title string) *AppErr {
 
 func (a *AppErr) WrappedError() error {
 	return a.wrappedErr
+}
+
+func (a *AppErr) LogStackTrace() {
+	if a.wrappedErr == nil {
+		return
+	}
+	fmt.Printf("Error stacktrace: \n%+v\n", a.wrappedErr)
 }
 
 type ErrorDef struct {

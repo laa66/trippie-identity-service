@@ -8,11 +8,11 @@ import (
 	"github.com/laa66/trippie-identity-service.git/config"
 	"github.com/laa66/trippie-identity-service.git/internal/adapters/logger"
 	"github.com/laa66/trippie-identity-service.git/internal/adapters/repository"
-	http_server "github.com/laa66/trippie-identity-service.git/server"
+	"github.com/laa66/trippie-identity-service.git/server"
 )
 
 type App struct {
-	httpServer *http_server.HttpServer
+	httpServer *httpserver.HttpServer
 }
 
 func (a *App) Run() {
@@ -25,10 +25,13 @@ func CreateApp() *App {
 	config.LoadConfig("../identity_config.yaml")
 	app := &App{}
 	engine := gin.Default()
-	engine.Use(http_server.ErrorHandler())
-	app.httpServer = http_server.NewHttpServer(engine)
+	engine.Use(httpserver.ErrorHandler())
+	app.httpServer = httpserver.NewHttpServer(engine)
 
-	repository.NewPostgresRepositories()
+	if _, err := repository.NewPostgresRepositories(); err != nil {
+		err.LogStackTrace()
+		panic(err)
+	}
 
 	// Register JSON endpoints
 	api.RegisterIdentityEndpoints(app.httpServer.GetRouterGroup("identity"))
