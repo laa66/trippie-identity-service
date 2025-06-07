@@ -1,10 +1,10 @@
 package apperr
 
 import (
-	"context"
 	"fmt"
 
 	crerr "github.com/cockroachdb/errors"
+	"github.com/laa66/trippie-identity-service.git/ctx"
 )
 
 type AppErr struct {
@@ -37,8 +37,8 @@ func Wrap(err error) *AppErr {
 	}
 }
 
-func (a *AppErr) WithCtx(ctx context.Context) *AppErr {
-	a.wrappedErr = crerr.WithContextTags(a.wrappedErr, ctx)
+func (a *AppErr) WithCtx(ctx ctx.Ctx) *AppErr {
+	a.wrappedErr = crerr.WithContextTags(a.wrappedErr, ctx.Context())
 	return a
 }
 

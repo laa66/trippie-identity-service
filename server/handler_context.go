@@ -6,38 +6,51 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type HandlerContext struct {
+type HandlerContext interface {
+	QueryParam(name string) string
+	Param(name string) string
+	Header(name string) string
+	Context() context.Context
+	BindBody(dest any) error
+	JSON(status int, obj any)
+	Status(status int)
+	Error(err error)
+}
+
+var _ HandlerContext = (*handlerContext)(nil)
+
+type handlerContext struct {
 	Ctx *gin.Context
 }
 
-func (h *HandlerContext) QueryParam(name string) string {
+func (h *handlerContext) QueryParam(name string) string {
 	return h.Ctx.Query(name)
 }
 
-func (h *HandlerContext) Param(name string) string {
+func (h *handlerContext) Param(name string) string {
 	return h.Ctx.Param(name)
 }
 
-func (h *HandlerContext) Header(name string) string {
+func (h *handlerContext) Header(name string) string {
 	return h.Ctx.GetHeader(name)
 }
 
-func (h *HandlerContext) BindBody(dest any) error {
+func (h *handlerContext) BindBody(dest any) error {
 	return h.Ctx.ShouldBindJSON(dest)
 }
 
-func (h *HandlerContext) Context() context.Context {
+func (h *handlerContext) Context() context.Context {
 	return h.Ctx.Request.Context()
 }
 
-func (h *HandlerContext) JSON(status int, obj any) {
+func (h *handlerContext) JSON(status int, obj any) {
 	h.Ctx.JSON(status, obj)
 }
 
-func (h *HandlerContext) Status(status int) {
+func (h *handlerContext) Status(status int) {
 	h.Ctx.Status(status)
 }
 
-func (h *HandlerContext) Error(err error) {
+func (h *handlerContext) Error(err error) {
 	h.Ctx.Error(err)
 }

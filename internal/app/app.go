@@ -4,10 +4,12 @@ import (
 	"log/slog"
 
 	"github.com/gin-gonic/gin"
-	"github.com/laa66/trippie-identity-service.git/api"
 	"github.com/laa66/trippie-identity-service.git/config"
+	"github.com/laa66/trippie-identity-service.git/internal/adapters/handlers"
+	"github.com/laa66/trippie-identity-service.git/internal/adapters/http"
 	"github.com/laa66/trippie-identity-service.git/internal/adapters/logger"
 	"github.com/laa66/trippie-identity-service.git/internal/adapters/repository"
+	"github.com/laa66/trippie-identity-service.git/internal/core/services"
 	"github.com/laa66/trippie-identity-service.git/server"
 )
 
@@ -16,7 +18,7 @@ type App struct {
 }
 
 func (a *App) Run() {
-	a.httpServer.Run()
+	a.httpServer.Run(8080)
 }
 
 func CreateApp() *App {
@@ -33,7 +35,12 @@ func CreateApp() *App {
 		panic(err)
 	}
 
+	identityService := services.NewIdentityService()
+	identityHandler := handlers.NewIdentityHandler(identityService)
+	httpServer := http.NewHTTPServer(identityHandler)
+
 	// Register JSON endpoints
-	api.RegisterIdentityEndpoints(app.httpServer.GetRouterGroup("identity"))
+	httpServer.RegisterIdentityEndpoints(app.httpServer.GetRouterGroup("identity"))
+
 	return app
 }

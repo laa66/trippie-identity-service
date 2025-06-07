@@ -1,8 +1,11 @@
 package httpserver
 
 import (
-	"github.com/gin-gonic/gin"
+	"fmt"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	apperr "github.com/laa66/trippie-identity-service.git/error"
 )
 
 // TODO: move to lib
@@ -20,9 +23,9 @@ func (h *HttpServer) GetRouterGroup(prefix string) *gin.RouterGroup {
 	return h.Engine.Group(prefix)
 }
 
-func (h *HttpServer) Run() {
+func (h *HttpServer) Run(port int) {
 	// TODO: move to config
-	h.Engine.Run(":8080")
+	h.Engine.Run(fmt.Sprintf(":%d", port))
 }
 
 type HandlerWithBody[T any] func(HandlerContext, T) (int, any, error)
@@ -36,7 +39,7 @@ func WrapWithBody[T any](handler HandlerWithBody[T]) gin.HandlerFunc {
 			return
 		}
 
-		handlerContext := HandlerContext{Ctx: c}
+		handlerContext := &handlerContext{Ctx: c}
 
 		code, res, err := handler(handlerContext, body)
 
@@ -51,8 +54,9 @@ func WrapWithBody[T any](handler HandlerWithBody[T]) gin.HandlerFunc {
 
 func WrapNoBody(handler HandlerNoBody) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		handlerContext := HandlerContext{Ctx: c}
+		handlerContext := &handlerContext{Ctx: c}
 		code, res, err := handler(handlerContext)
+		fmt.Printf("handler response: {code: %d, res: %s, err: %+v}\n", code, res, err)
 		if res == nil {
 			responseNoData(c, code, err)
 		} else {
@@ -71,8 +75,16 @@ func responseNoData(c *gin.Context, code int, err error) {
 
 func response(c *gin.Context, code int, data any, err error) {
 	if err != nil {
+		if apperr, ok := err.(*apperr.AppErr); ok {
+			if apperr == nil {
+				c.JSON(code, data)
+				return
+			}
+			c.Error(apperr)
+			return
+		}
 		c.Error(err)
-	} else {
-		c.JSON(code, data)
+		return
 	}
+	c.JSON(code, data)
 }
