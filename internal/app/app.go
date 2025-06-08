@@ -30,12 +30,13 @@ func CreateApp() *App {
 	engine.Use(httpserver.ErrorHandler())
 	app.httpServer = httpserver.NewHttpServer(engine)
 
-	if _, err := repository.NewPostgresRepositories(); err != nil {
+	repositories, err := repository.NewPostgresRepositories();
+	if err != nil {
 		err.LogStackTrace()
 		panic(err)
 	}
 
-	identityService := services.NewIdentityService()
+	identityService := services.NewIdentityService(repositories)
 	identityHandler := handlers.NewIdentityHandler(identityService)
 
 	// Register JSON endpoints

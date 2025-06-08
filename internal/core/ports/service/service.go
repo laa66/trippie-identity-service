@@ -8,7 +8,7 @@ import (
 
 type (
 	IdentityService interface {
-		GetIdentity(ctx.Ctx) (*dto.Identity, *apperr.AppErr)
-		RegisterIdentity(ctx.Ctx) *apperr.AppErr
+		GetIdentity(ctx ctx.Ctx) (*dto.Identity, *apperr.AppErr)
+		RegisterIdentity(ctx ctx.Ctx, identity *dto.CreateIdentity) *apperr.AppErr
 	}
 )

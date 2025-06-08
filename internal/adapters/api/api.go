@@ -18,5 +18,6 @@ func NewApi(ih handlers.IdentityHandler) *Api {
 }
 
 func (a *Api) RegisterIdentityEndpoints(rg *gin.RouterGroup) {
-	rg.GET("/identity", httpserver.WrapNoBody(a.IdentityHandler.GetIdentity))
+	rg.GET("", httpserver.WrapNoBody(a.IdentityHandler.GetIdentity))
+	rg.POST("", httpserver.WrapWithBody(a.IdentityHandler.RegisterIdentity))
 }

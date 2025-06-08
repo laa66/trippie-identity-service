@@ -3,6 +3,7 @@ package handlers
 import (
 	nethttp "net/http"
 
+	"github.com/laa66/trippie-identity-service.git/internal/adapters/logger"
 	"github.com/laa66/trippie-identity-service.git/internal/core/domain/dto"
 	"github.com/laa66/trippie-identity-service.git/internal/core/ports/service"
 	httpserver "github.com/laa66/trippie-identity-service.git/server"
@@ -32,6 +33,12 @@ func (i *identityHandler) GetIdentity(handlerContext httpserver.HandlerContext) 
 }
 
 func (i *identityHandler) RegisterIdentity(handlerContext httpserver.HandlerContext, identity *dto.CreateIdentity) (responseCode int, data any, err error) {
+	apperr := i.IdentityService.RegisterIdentity(handlerContext, identity)
+	if apperr != nil {
+		logger.Log().Debug("register identity", "error", apperr)
+		return 0, nil, apperr
+	}
 
-	return
+	logger.Log().Debug("register identity success")
+	return nethttp.StatusOK, nil, nil
 }

@@ -62,7 +62,9 @@ func (g *GormRepository[T]) GetAll() ([]*T, *apperr.AppErr) {
 }
 
 func (g *GormRepository[T]) Create(entity *T) *apperr.AppErr {
-	return g.pem(g.db.Create(entity).Error)
+	err := g.pem(g.db.Create(entity).Error)
+	return err
+
 }
 
 func (g *GormRepository[T]) Update(entity *T) *apperr.AppErr {

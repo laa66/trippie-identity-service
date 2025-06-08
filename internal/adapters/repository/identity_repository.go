@@ -6,13 +6,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type IdentityRepository struct {
+type identityRepository struct {
 	*persistencebase.GormRepository[entity.Identity]
 }
 
-func NewIdentityRepository(db *gorm.DB) *IdentityRepository {
-	ir := persistencebase.NewGormRepository[entity.Identity](db, nil)
-	return &IdentityRepository{
+func NewIdentityRepository(db *gorm.DB) *identityRepository {
+	ir := persistencebase.NewGormRepository[entity.Identity](db, MapPostgresError)
+	return &identityRepository{
 		GormRepository: ir,
 	}
 }

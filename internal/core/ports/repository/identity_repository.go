@@ -5,6 +5,6 @@ import (
 	persistencebase "github.com/laa66/trippie-identity-service.git/persistence_base"
 )
 
-type IIdentityRepository interface {
+type IdentityRepository interface {
 	persistencebase.Repository[entity.Identity]
 }

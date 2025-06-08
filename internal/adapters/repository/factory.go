@@ -6,15 +6,20 @@ import (
 	"github.com/laa66/trippie-identity-service.git/config"
 	apperr "github.com/laa66/trippie-identity-service.git/error"
 	"github.com/laa66/trippie-identity-service.git/internal/adapters/logger"
+	"github.com/laa66/trippie-identity-service.git/internal/core/ports/repository"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-type PostgresRepositories struct {
-	IdentityRepository *IdentityRepository
+type PostgresRepositories interface {
+	GetIdentityRepository() repository.IdentityRepository
 }
 
-func NewPostgresRepositories() (*PostgresRepositories, *apperr.AppErr) {
+type postgresRepositories struct {
+	IdentityRepository repository.IdentityRepository
+}
+
+func NewPostgresRepositories() (*postgresRepositories, *apperr.AppErr) {
 	logger.Log().Debug("creating postgres repositories")
 
 	db, err := gorm.Open(postgres.Open(createDSN()))
@@ -26,8 +31,12 @@ func NewPostgresRepositories() (*PostgresRepositories, *apperr.AppErr) {
 	return createRepositories(db), nil
 }
 
-func createRepositories(db *gorm.DB) *PostgresRepositories {
-	return &PostgresRepositories{
+func (p *postgresRepositories) GetIdentityRepository() repository.IdentityRepository {
+	return p.IdentityRepository
+}
+
+func createRepositories(db *gorm.DB) *postgresRepositories {
+	return &postgresRepositories{
 		NewIdentityRepository(db),
 	}
 }
