@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/laa66/trippie-identity-service.git/config"
 	"github.com/laa66/trippie-identity-service.git/internal/adapters/api"
+	"github.com/laa66/trippie-identity-service.git/internal/adapters/auth"
 	"github.com/laa66/trippie-identity-service.git/internal/adapters/handlers"
 	"github.com/laa66/trippie-identity-service.git/internal/adapters/logger"
 	"github.com/laa66/trippie-identity-service.git/internal/adapters/repository"
@@ -36,7 +37,8 @@ func CreateApp() *App {
 		panic(err)
 	}
 
-	identityService := services.NewIdentityService(repositories)
+	authService := auth.NewJWTService("yrdyRsE+0zzblyn2+ToV3gGn6vi/gY17Abm1P0unF45IxS3sLEYnFrO+FGd020U3MF5fqrukVIlNyTnzF1RfKg==")
+	identityService := services.NewIdentityService(repositories, authService)
 	identityHandler := handlers.NewIdentityHandler(identityService)
 
 	// Register JSON endpoints
