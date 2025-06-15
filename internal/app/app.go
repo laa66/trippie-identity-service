@@ -37,7 +37,7 @@ func CreateApp() *App {
 		panic(err)
 	}
 
-	authService := auth.NewJWTService("yrdyRsE+0zzblyn2+ToV3gGn6vi/gY17Abm1P0unF45IxS3sLEYnFrO+FGd020U3MF5fqrukVIlNyTnzF1RfKg==")
+	authService := auth.NewJWTService()
 	identityService := services.NewIdentityService(repositories, authService)
 	identityHandler := handlers.NewIdentityHandler(identityService)
 
