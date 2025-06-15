@@ -18,3 +18,7 @@ func InitLogger(level slog.Level) {
 func Log() *slog.Logger {
 	return Logger
 }
+
+func LogErr(err error) {
+	Log().Error("error", "error", err)
+}

@@ -25,7 +25,7 @@ func NewJWTService() *jwtService {
 }
 
 func (j *jwtService) GenerateTokens(userID string, tokenTypes ...jwtauth.TokenType) (jwtauth.Tokens, *apperr.AppErr) {
-	logger.Log().Debug("enter generate tokens")
+	logger.Log().Debug("enter generate tokens", "userID", userID, "token types", tokenTypes)
 
 	tokens := jwtauth.Tokens{}
 	for _, tokenType := range tokenTypes {
@@ -58,7 +58,6 @@ func (j *jwtService) CreateToken(userID string, tokenType jwtauth.TokenType, sec
 	case jwtauth.RefreshToken:
 		claims.RegisteredClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(60 * time.Minute))
 	}
-	logger.Log().Debug("created token claims", "claims", claims)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	secret := jwtauth.GetJWTSecretKey()
@@ -67,11 +66,11 @@ func (j *jwtService) CreateToken(userID string, tokenType jwtauth.TokenType, sec
 		logger.Log().Error("error while signing JWT token", "error", err)
 		return nil, apperr.Wrap(err)
 	}
-	logger.Log().Debug("signed access token", "JWT", token)
 	return &signedToken, nil
 }
 
 func (j *jwtService) VerifyToken(tokenStr string) (*jwtauth.Claims, *apperr.AppErr) {
+	logger.Log().Debug("enter verify token", "token", tokenStr)
 	secret := jwtauth.GetJWTSecretKey()
 	claims := &jwtauth.MapClaims{}
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
@@ -92,6 +91,19 @@ func (j *jwtService) VerifyToken(tokenStr string) (*jwtauth.Claims, *apperr.AppE
 	}, nil
 }
 
-func (j *jwtService) RefreshToken(tokenStr string) (jwtauth.Tokens, *apperr.AppErr) {
-	panic("unimplemented")
+func (j *jwtService) RefreshToken(refreshToken string) (jwtauth.Tokens, *apperr.AppErr) {
+	logger.Log().Debug("enter refresh token", "token", refreshToken)
+	claims, err := j.VerifyToken(refreshToken)
+	if err != nil {
+		logger.Log().Error("error while veryfing token", "error", err)
+		return nil, err
+	}
+
+	tokens, err := j.GenerateTokens(claims.UserID, jwtauth.AccessToken, jwtauth.RefreshToken)
+	if err != nil {
+		logger.LogErr(err)
+		return nil, err
+	}
+
+	return tokens, nil
 }
